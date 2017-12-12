@@ -43,6 +43,16 @@
 #include <SoftwareSerial.h>
 #include "Wire.h"
 
+
+// Variables for Maidenhead locator calculations
+char* FirstCharString[]={"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R"};
+char* MidCharString[]={"0","1","2","3","4","5","6","7","8","9"};
+char* LastCharString[]={"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x"};
+float scrap;
+float loclong;
+float loclat;
+
+
 // Mode defines
 #define WSPR_TONE_SPACING       146           // ~1.46 Hz
 #define WSPR_DELAY              683          // Delay value for WSPR
@@ -92,7 +102,7 @@ SoftwareSerial ss(RXPin, TXPin);
 void encode()
 {
   uint8_t i;
-  
+
   // Reset the tone to the base frequency and turn on the output
   si5351.output_enable(SI5351_CLK0, 1);
   digitalWrite(LED_PIN, HIGH);
@@ -150,14 +160,14 @@ void setup()
   // tone delay depending on mode
   switch(cur_mode)
   {
- 
+
   case MODE_WSPR:
     freq = WSPR_DEFAULT_FREQ;
     symbol_count = WSPR_SYMBOL_COUNT; // From the library defines
     tone_spacing = WSPR_TONE_SPACING;
     tone_delay = WSPR_DELAY;
     break;
- 
+
   }
 
   // Set CLK0 output
@@ -173,12 +183,42 @@ void setup()
 static void smartDelay(unsigned long ms)
 {
   unsigned long start = millis();
-  do 
+  do
   {
     while (ss.available())
       gps.encode(ss.read());
   } while (millis() - start < ms);
 }
+
+
+
+
+
+void printLoc(void)
+{
+loclong=(gps.location.lng()+180)*1000000;
+loclat=(gps.location.lat()+90)*1000000;
+// First Character - longitude based (every 20° = 1 gridsq)
+Serial.print(FirstCharString[int(loclong/20000000)]);
+// Second Character - latitude based (every 10° = 1 gridsq)
+Serial.print(FirstCharString[int(loclat/10000000)]);
+// Third Character - longitude based (every 2Â° = 1 gridsq)
+scrap = loclong - (20000000 * int (loclong/20000000));
+Serial.print(MidCharString[int(scrap*10/20/1000000)]);
+// Fourth Character - latitude based (every 1Â° = 1 gridsq)
+scrap = loclat - (10000000 * int (loclat/10000000));
+Serial.print(MidCharString[int(scrap/1000000)]);
+// Fifth Character - longitude based (every 5' = 1 gridsq)
+//scrap = (loclong / 2000000) - (int (loclong/2000000));
+//Serial.print(LastCharString[int(scrap * 24)]);
+// Sixth Character - longitude based (every 2.5' = 1 gridsq)
+//scrap = (loclat / 1000000) - (int (loclat/1000000));
+//Serial.print(LastCharString[int(scrap * 24)]);
+
+}
+
+
+
 
 
 
@@ -190,9 +230,9 @@ void loop()
     {
     Serial.println(F("Valid GPS Lock"));
     if ((gps.time.second() == 0 ) && ( (gps.time.minute() == 0 ) || (gps.time.minute() == 10) || (gps.time.minute() == 20) || (gps.time.minute() == 30) || (gps.time.minute() == 40) || (gps.time.minute() == 50)))
-        {   
+        {
            Serial.print("Ten MInute STart      ");
-           Serial.print(gps.time.hour()); 
+           Serial.print(gps.time.hour());
            Serial.print(F(":"));
            Serial.print(gps.time.minute());
            Serial.print(":");
@@ -201,7 +241,7 @@ void loop()
            encode();
         }
     }
-    
+
   else
     {
     Serial.println(F("GPS Lock Not acuqired:"));
@@ -215,7 +255,7 @@ void loop()
 
   if (millis() > 5000 && gps.charsProcessed() < 10)
     Serial.println(F("No GPS data received: check wiring"));
-    
+
   //encode();
   //delay(129400);
    smartDelay(1000);
