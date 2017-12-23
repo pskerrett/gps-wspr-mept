@@ -1,4 +1,4 @@
-# gps-wspr-mept
+# w9pds-gps-wspr-mept
 
 MEPT beacon for Transmission of WSPR signals using an Si5351 and a GPS timer.
 
