@@ -50,8 +50,7 @@
 #define DEFAULT_MODE            MODE_WSPR
 
 // Hardware defines
-#define LED_PIN                 13
-
+#define LED_PIN          13
 #define RED_LED          12
 #define GREEN_LED        11
 
@@ -65,7 +64,7 @@ JTEncode jtencode;
 // Global variables
 unsigned long freq;
 char call[] = "AAAA";     //CHANGE AAAA TO YOUR CALLSIGN!!
-uint8_t dbm = 10;
+uint8_t dbm = 10;         //CHANGE for your power setting. 10dbm = 0.01W
 uint8_t tx_buffer[255];
 enum mode cur_mode = DEFAULT_MODE;
 uint8_t symbol_count;
@@ -126,7 +125,7 @@ void encode()
 void set_tx_buffer()
 {
 
-  
+
   // Clear out the transmit buffer
   memset(tx_buffer, 0, 255);
     // Find current Maidenhead from GPS
@@ -140,17 +139,17 @@ void set_tx_buffer()
   MH[2] += int(scrap*10/20/1000000);    //Third Char
   scrap = loclat - (10000000 * int (loclat/10000000));
   MH[3] += int(scrap/1000000);          //Fourth Char
-  
+
     String MH_txt = "";                              // Build up Maidenhead
     int x = 0;                                       // into a string that's easy to print
-    while (x < 4){ 
+    while (x < 4){
       MH_txt += MH[x];
       x++; }
 
 
      Serial.print("Found Maidenhead: ");              //Only for debug
      Serial.println(MH_txt);
-     
+
   // Set the proper frequency and timer CTC depending on mode
   switch(cur_mode)
   {
@@ -176,18 +175,18 @@ void waitForTime()
     Serial.print(F(":"));
     Serial.println(gps.time.second());
     digitalWrite(GREEN_LED, HIGH);
-   
+
 
     //Configure your transmit schedule here. Transmit should be done on even minute at 0 seconds.
     //Default is every 10 minutes.
-    if ((gps.time.second() == 0 ) && 
+    if ((gps.time.second() == 0 ) &&
     ( (gps.time.minute() == 0 ) || (gps.time.second() == 0 ) &&
     (gps.time.minute() == 10) || (gps.time.second() == 0 ) &&
     (gps.time.minute() == 20) || (gps.time.second() == 0 ) &&
     (gps.time.minute() == 30) || (gps.time.second() == 0 ) &&
     (gps.time.minute() == 40) ||   (gps.time.second() == 0 ) &&
     (gps.time.minute() == 50)))
-       
+
         {
            Serial.print("Ten MInute STart      ");   //print for debug
            Serial.print(gps.time.hour());
@@ -205,7 +204,7 @@ void waitForTime()
     Serial.println(F("GPS Lock Not aquired: "));
     Serial.println(gps.satellites.value());
     digitalWrite(GREEN_LED, LOW);
-    
+
 
     }
 
@@ -217,7 +216,7 @@ void waitForTime()
 static void smartdelay(unsigned long ms)
 {
   unsigned long start = millis();
-  do 
+  do
   {
     while (ss.available())
       gps.encode(ss.read());
@@ -252,9 +251,9 @@ void setup()
   delay(500);
   digitalWrite(LED_PIN, HIGH);
   delay(500);
-  
+
   // Use the Arduino's on-board LED as a keying indicator.
-  
+
   digitalWrite(LED_PIN, LOW);
   digitalWrite(RED_LED, LOW);
   digitalWrite(GREEN_LED, LOW);
@@ -303,12 +302,3 @@ void loop()
     Serial.println(F("No GPS data received: check wiring"));
 
 }
-
-
-
-
-
-
-
-
-
