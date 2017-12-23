@@ -5,7 +5,24 @@ MEPT beacon for Transmission of WSPR signals using an Si5351 and a GPS timer.
 TO use, be sure to change the following values:
 
 char call[] = "AAAA";     //CHANGE AAAA TO YOUR CALLSIGN!!
-uint8_t dbm = 10;         //CHANGE for your power setting. 10dbm = 0.01W
+
+uint8_t dbm = 10;         //CHANGE for your power setting.
+10dbm means 0.01W - This is typical for an Si5351 without an amplifier
+
+BE SURE TO USE A PROPER LOW PASS FILTER!!!
+Your signal output will not be clean and you will broadcast spurious emissions
+on un-intended bands without a filter.
+Performance will also greatly improve if you us a proper filter in-line.
+
+
+I've had great success using the QRL-Labs kits:
+https://www.qrp-labs.com/lpfkit.html
+
+
+
+###########################
+Wiring -
+###########################
 
 
 On an Arduino Nano, the GPS is wired as follows:
