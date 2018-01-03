@@ -30,6 +30,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+#define DEBUG     // Comment this line to reduce memory
 #include <si5351.h>
 #include <JTEncode.h>
 #include <rs_common.h>
@@ -100,9 +101,12 @@ void encode()
 {
   // Reset the tone to the base frequency and turn on the output
   si5351.output_enable(SI5351_CLK0, 1);
+
+  #ifdef DEBUG
   digitalWrite(RED_LED, HIGH);
   digitalWrite(GREEN_LED, LOW);
   Serial.println(F("Transmitting"));
+  #endif
 
   // Now transmit the channel symbols
   uint8_t i;
@@ -114,8 +118,10 @@ void encode()
 
   // Turn off the output
   si5351.output_enable(SI5351_CLK0, 0);
+  #ifdef DEBUG
   digitalWrite(RED_LED, LOW);
   Serial.println(F("Transmit End"));
+  #endif
   smartdelay(5000);
 }
 
@@ -140,6 +146,7 @@ void set_tx_buffer()
   scrap = loclat - (10000000 * int (loclat/10000000));
   MH[3] += int(scrap/1000000);          //Fourth Char
 
+    #ifdef DEBUG
     String MH_txt = "";                              // Build up Maidenhead
     int x = 0;                                       // into a string that's easy to print
     while (x < 4){
@@ -149,6 +156,7 @@ void set_tx_buffer()
 
      Serial.print("Found Maidenhead: ");              //Only for debug
      Serial.println(MH_txt);
+     #endif
 
   // Set the proper frequency and timer CTC depending on mode
   switch(cur_mode)
@@ -167,6 +175,7 @@ void waitForTime()
     //Check for GPS lock
   if ( gps.satellites.value() > 2 )
     {
+    #ifdef DEBUG
     Serial.print(F("Valid GPS Lock. Sats:"));
     Serial.println(gps.satellites.value());
     Serial.print(gps.time.hour());
@@ -175,6 +184,7 @@ void waitForTime()
     Serial.print(F(":"));
     Serial.println(gps.time.second());
     digitalWrite(GREEN_LED, HIGH);
+    #endif
 
 
     //Configure your transmit schedule here. Transmit should be done on even minute at 0 seconds.
@@ -188,12 +198,14 @@ void waitForTime()
     (gps.time.minute() == 50)))
 
         {
+           #ifdef DEBUG
            Serial.print("Ten MInute STart      ");   //print for debug
            Serial.print(gps.time.hour());
            Serial.print(F(":"));
            Serial.print(gps.time.minute());
            Serial.print(F(":"));
            Serial.print(gps.time.second());
+           #endif
            set_tx_buffer();
            encode();
         }
@@ -201,9 +213,11 @@ void waitForTime()
 
   else
     {
+    #ifdef DEBUG
     Serial.println(F("GPS Lock Not aquired: "));
     Serial.println(gps.satellites.value());
     digitalWrite(GREEN_LED, LOW);
+    #endif
 
 
     }
@@ -230,16 +244,12 @@ static void smartdelay(unsigned long ms)
 
 void setup()
 {
-
-  Serial.begin(115200);
   ss.begin(GPSBaud);
 
-  Serial.println(F("Starting GPS WSPR System"));
-  // Initialize the Si5351
-  // Change the 2nd parameter in init if using a ref osc other
-  // than 25 MHz
-  si5351.init(SI5351_CRYSTAL_LOAD_8PF, 0, 0);
+  #ifdef DEBUG
+  Serial.begin(115200);
 
+  Serial.println(F("Starting GPS WSPR System"));
   //init leds
   pinMode(RED_LED, OUTPUT);
   pinMode(GREEN_LED, OUTPUT);
@@ -252,11 +262,17 @@ void setup()
   digitalWrite(LED_PIN, HIGH);
   delay(500);
 
-  // Use the Arduino's on-board LED as a keying indicator.
-
   digitalWrite(LED_PIN, LOW);
   digitalWrite(RED_LED, LOW);
   digitalWrite(GREEN_LED, LOW);
+  #endif
+
+  // Initialize the Si5351
+  // Change the 2nd parameter in init if using a ref osc other
+  // than 25 MHz
+  si5351.init(SI5351_CRYSTAL_LOAD_8PF, 0, 0);
+
+
 
 
   // Set the mode to use
@@ -297,8 +313,9 @@ void loop()
       waitForTime();
 
 
-
+  #ifdef DEBUG
   if (millis() > 5000 && gps.charsProcessed() < 10)
     Serial.println(F("No GPS data received: check wiring"));
+  #endif
 
 }
