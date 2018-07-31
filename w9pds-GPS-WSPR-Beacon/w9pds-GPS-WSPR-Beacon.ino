@@ -62,6 +62,7 @@ enum mode {MODE_WSPR};
 Si5351 si5351;
 JTEncode jtencode;
 
+
 // Global variables
 unsigned long freq;
 char call[] = "AAAA";     //CHANGE AAAA TO YOUR CALLSIGN!!
