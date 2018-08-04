@@ -29,6 +29,7 @@
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+char VERSION = "1.1";
 
 #define DEBUG     // Comment this line to reduce memory
 #include <si5351.h>
@@ -65,7 +66,7 @@ JTEncode jtencode;
 
 // Global variables
 unsigned long freq;
-char call[] = "W9PDS";     //CHANGE AAAA TO YOUR CALLSIGN!!
+char call[] = "AAAA";     //CHANGE AAAA TO YOUR CALLSIGN!!
 uint8_t dbm = 10;         //CHANGE for your power setting. 10dbm = 0.01W
 uint8_t tx_buffer[255];
 enum mode cur_mode = DEFAULT_MODE;
@@ -266,7 +267,9 @@ void setup()
   #ifdef DEBUG
   Serial.begin(115200);
 
-  Serial.println(F("Starting GPS WSPR System"));
+  Serial.println(F("Starting W9PDS GPS WSPR System"));
+  Serial.print("Version: ");
+  Serial.println(VERSION);
   //init leds
   pinMode(RED_LED, OUTPUT);
   pinMode(GREEN_LED, OUTPUT);
