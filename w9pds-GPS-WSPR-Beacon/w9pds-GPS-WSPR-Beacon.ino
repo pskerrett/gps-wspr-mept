@@ -30,8 +30,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-//#define DEBUG     // Comment next 2 lines to reduce memory
-#define LED_DEBUG
+#define DEBUG     // Comment this line to reduce memory
 #include <si5351.h>
 #include <JTEncode.h>
 #include <rs_common.h>
@@ -105,11 +104,9 @@ void encode()
   si5351.output_enable(SI5351_CLK0, 1);
 
   #ifdef DEBUG
-  Serial.println(F("Transmitting"));
-  #endif
-  #ifdef LED_DEBUG
   digitalWrite(RED_LED, HIGH);
   digitalWrite(GREEN_LED, LOW);
+  Serial.println(F("Transmitting"));
   #endif
 
   // Now transmit the channel symbols
@@ -123,12 +120,9 @@ void encode()
   // Turn off the output
   si5351.output_enable(SI5351_CLK0, 0);
   #ifdef DEBUG
+  digitalWrite(RED_LED, LOW);
   Serial.println(F("Transmit End"));
   #endif
-  #ifdef LED_DEBUG
-    digitalWrite(RED_LED, LOW);
-  #endif
-
   smartdelay(5000);
 }
 
@@ -159,6 +153,8 @@ void set_tx_buffer()
     while (x < 4){
       MH_txt += MH[x];
       x++; }
+
+
      Serial.print("Found Maidenhead: ");              //Only for debug
      Serial.println(MH_txt);
      #endif
@@ -188,8 +184,6 @@ void waitForTime()
     Serial.print(gps.time.minute());
     Serial.print(F(":"));
     Serial.println(gps.time.second());
-    #endif
-    #ifdef LED_DEBUG
     digitalWrite(GREEN_LED, HIGH);
     #endif
 
@@ -206,7 +200,7 @@ void waitForTime()
 
         {
            #ifdef DEBUG
-           Serial.print("Scheduled Transmit Start:      ");   //print for debug
+           Serial.print("Ten MInute STart      ");   //print for debug
            Serial.print(gps.time.hour());
            Serial.print(F(":"));
            Serial.print(gps.time.minute());
@@ -221,11 +215,25 @@ void waitForTime()
   else
     {
     #ifdef DEBUG
+    digitalWrite(RED_LED, LOW);
     Serial.println(F("GPS Lock Not aquired: "));
     Serial.println(gps.satellites.value());
-    #endif
-    #ifdef LED_DEBUG
     digitalWrite(GREEN_LED, LOW);
+    for (int satCount = 0; satCount < gps.satellites.value(); satCount++) {
+      digitalWrite(GREEN_LED, HIGH);
+      smartdelay(200);
+      digitalWrite(GREEN_LED, LOW);
+      smartdelay(200);
+    }
+    
+    if (gps.satellites.value() == 0) {
+      digitalWrite(RED_LED, HIGH);
+      smartdelay(200);
+      digitalWrite(RED_LED, LOW);
+      smartdelay(1000);
+    }
+    
+    
     #endif
 
 
@@ -257,9 +265,8 @@ void setup()
 
   #ifdef DEBUG
   Serial.begin(115200);
+
   Serial.println(F("Starting GPS WSPR System"));
-  #endif
-  #ifdef LED_DEBUG
   //init leds
   pinMode(RED_LED, OUTPUT);
   pinMode(GREEN_LED, OUTPUT);
