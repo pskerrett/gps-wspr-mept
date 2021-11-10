@@ -29,8 +29,7 @@
 // CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-char VERSION = "1.1";
-
+String VERSION = "1.2";
 #define DEBUG     // Comment this line to reduce memory
 #include <si5351.h>
 #include <JTEncode.h>
@@ -44,10 +43,10 @@ char VERSION = "1.1";
 
 // Mode defines
 #define WSPR_TONE_SPACING       146           // ~1.46 Hz
-#define WSPR_DELAY              683          // Delay value for WSPR
-
+#define WSPR_DELAY              683          // Delay value for WSPR. May need to be 643 if running 8Mhz Clock
+//#define WSPR_DELAY              341          // Delay value for WSPR
 //#define WSPR_DEFAULT_FREQ       14097045UL
-#define WSPR_DEFAULT_FREQ       14097000UL  //You may want to adjust after calibrating your Si5351
+#define WSPR_DEFAULT_FREQ       14093300UL  //You may want to adjust after calibrating your Si5351
 
 #define DEFAULT_MODE            MODE_WSPR
 
@@ -77,12 +76,13 @@ float scrap;
 float lon;
 float lat;
 
+
 /*
    This sample code demonstrates the normal use of a TinyGPS++ (TinyGPSPlus) object.
    It requires the use of SoftwareSerial, and assumes that you have a
-   9600baud serial GPS device hooked up on pins 4(rx) and 3(tx).
+   9600baud serial GPS device hooked up
 */
-static const int RXPin = 4, TXPin = 3;
+static const int RXPin = 9, TXPin = 8;
 static const uint32_t GPSBaud = 9600;
 // The TinyGPS++ object
 TinyGPSPlus gps;
@@ -106,7 +106,7 @@ void encode()
 
   #ifdef DEBUG
   digitalWrite(RED_LED, HIGH);
-  digitalWrite(GREEN_LED, LOW);
+ // digitalWrite(GREEN_LED, LOW);
   Serial.println(F("Transmitting"));
   #endif
 
@@ -122,7 +122,12 @@ void encode()
   si5351.output_enable(SI5351_CLK0, 0);
   #ifdef DEBUG
   digitalWrite(RED_LED, LOW);
-  Serial.println(F("Transmit End"));
+  Serial.println(F("Transmit End "));
+  Serial.print(gps.time.hour());
+  Serial.print(F(":"));
+  Serial.print(gps.time.minute());
+  Serial.print(F(":"));
+  Serial.println(gps.time.second());
   #endif
   smartdelay(5000);
 }
@@ -175,8 +180,11 @@ void set_tx_buffer()
 void waitForTime()
 {
     //Check for GPS lock
-  if ( gps.satellites.value() > 2 )
+
+
+    if ( gps.satellites.value() > 2 )
     {
+    smartdelay(1000);
     #ifdef DEBUG
     Serial.print(F("Valid GPS Lock. Sats:"));
     Serial.println(gps.satellites.value());
@@ -191,13 +199,47 @@ void waitForTime()
 
     //Configure your transmit schedule here. Transmit should be done on even minute at 0 seconds.
     //Default is every 10 minutes.
-    if ((gps.time.second() == 0 ) &&
-    ( (gps.time.minute() == 0 ) || (gps.time.second() == 0 ) &&
-    (gps.time.minute() == 10) || (gps.time.second() == 0 ) &&
-    (gps.time.minute() == 20) || (gps.time.second() == 0 ) &&
-    (gps.time.minute() == 30) || (gps.time.second() == 0 ) &&
-    (gps.time.minute() == 40) ||   (gps.time.second() == 0 ) &&
-    (gps.time.minute() == 50)))
+    if (
+//      (gps.time.second() == 0 ) && ( (gps.time.minute() == 0 ) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 2) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 4) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 6) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 8) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 10)
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 12) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 14) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 16) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 18) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 20)
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 22) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 24) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 26)
+//     || (gps.time.second() == 0 ) && (gps.time.minute() == 28) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 30) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 32) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 34) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 36)
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 38) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 40) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 42) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 44) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 46)
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 48) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 50) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 52)
+//        || (gps.time.second() == 0 ) && (gps.time.minute() == 54) 
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 56)   
+//    || (gps.time.second() == 0 ) && (gps.time.minute() == 58))
+
+      (gps.time.second() == 0 ) && ( (gps.time.minute() == 0 ) 
+    || (gps.time.second() == 0 ) && (gps.time.minute() == 10)
+    || (gps.time.second() == 0 ) && (gps.time.minute() == 20)
+    || (gps.time.second() == 0 ) && (gps.time.minute() == 30) 
+    || (gps.time.second() == 0 ) && (gps.time.minute() == 40) 
+    || (gps.time.second() == 0 ) && (gps.time.minute() == 50)  )
+
+    
+    )
 
         {
            #ifdef DEBUG
@@ -207,8 +249,9 @@ void waitForTime()
            Serial.print(gps.time.minute());
            Serial.print(F(":"));
            Serial.print(gps.time.second());
+           Serial.print(F(" "));
            #endif
-           set_tx_buffer();
+           set_tx_buffer(); //start the transmit
            encode();
         }
     }
@@ -216,9 +259,14 @@ void waitForTime()
   else
     {
     #ifdef DEBUG
-    digitalWrite(RED_LED, LOW);
-    Serial.println(F("GPS Lock Not aquired: "));
+   // digitalWrite(RED_LED, LOW);
+    Serial.print(F("GPS Lock not acquired: "));
     Serial.println(gps.satellites.value());
+    Serial.print(gps.time.hour());
+    Serial.print(":");
+    Serial.print(gps.time.minute());
+    Serial.print(":");
+    Serial.println(gps.time.second());
     digitalWrite(GREEN_LED, LOW);
     for (int satCount = 0; satCount < gps.satellites.value(); satCount++) {
       digitalWrite(GREEN_LED, HIGH);
@@ -228,9 +276,9 @@ void waitForTime()
     }
     
     if (gps.satellites.value() == 0) {
-      digitalWrite(RED_LED, HIGH);
+      //digitalWrite(RED_LED, HIGH);
       smartdelay(200);
-      digitalWrite(RED_LED, LOW);
+     // digitalWrite(RED_LED, LOW);
       smartdelay(1000);
     }
     
@@ -265,7 +313,7 @@ void setup()
   ss.begin(GPSBaud);
 
   #ifdef DEBUG
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   Serial.println(F("Starting W9PDS GPS WSPR System"));
   Serial.print("Version: ");
@@ -275,15 +323,15 @@ void setup()
   pinMode(GREEN_LED, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
 
-  digitalWrite(RED_LED, HIGH);
-  delay(500);
+  //digitalWrite(RED_LED, HIGH);
+ // delay(500);
   digitalWrite(GREEN_LED, HIGH);
   delay(500);
   digitalWrite(LED_PIN, HIGH);
   delay(500);
 
   digitalWrite(LED_PIN, LOW);
-  digitalWrite(RED_LED, LOW);
+  //digitalWrite(RED_LED, LOW);
   digitalWrite(GREEN_LED, LOW);
   #endif
 
@@ -337,5 +385,4 @@ void loop()
   if (millis() > 5000 && gps.charsProcessed() < 10)
     Serial.println(F("No GPS data received: check wiring"));
   #endif
-
 }
