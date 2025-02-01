@@ -4,6 +4,7 @@ MEPT beacon for Transmission of WSPR signals using an Si5351 and a GPS timer.
 
 TO use, be sure to change the following values:
 
+
 char call[] = "AAAA";     //CHANGE AAAA TO YOUR CALLSIGN!!
 
 uint8_t dbm = 10;         //CHANGE for your power setting.
